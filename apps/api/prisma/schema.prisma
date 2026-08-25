@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  username      String         @unique
+  createdAt     DateTime       @default(now())
+  favoriteTeams FavoriteTeam[]
+
+  following Follow[] @relation("Follower")
+  followers Follow[] @relation("Following")
+
+  watchParties      WatchParty[]
+  watchPartyMembers WatchPartyMember[]
+  predictions       Prediction[]
+}
+
+model FavoriteTeam {
+  id        String   @id @default(cuid())
+  userId    String
+  teamId    Int
+  teamName  String
+  crestUrl  String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId])
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+}
+
+model WatchParty {
+  id         String   @id @default(cuid())
+  matchId    Int
+  hostId     String
+  name       String
+  isPrivate  Boolean  @default(false)
+  inviteCode String   @unique
+  status     String   @default("ACTIVE")
+  createdAt  DateTime @default(now())
+
+  host    User               @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  members WatchPartyMember[]
+}
+
+model WatchPartyMember {
+  id           String   @id @default(cuid())
+  watchPartyId String
+  userId       String
+  role         String   @default("MEMBER")
+  joinedAt     DateTime @default(now())
+
+  watchParty WatchParty @relation(fields: [watchPartyId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([watchPartyId, userId])
+}
+
+model Prediction {
+  id                 String    @id @default(cuid())
+  userId             String
+  matchId            Int
+  predictedWinner    String
+  predictedHomeScore Int
+  predictedAwayScore Int
+  pointsAwarded      Int?
+  evaluatedAt        DateTime?
+  createdAt          DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, matchId])
+}

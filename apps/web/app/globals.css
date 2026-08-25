@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-pitch-950 text-chalk font-body;
+}
+
+/* Tabular numerals everywhere scores/stats appear, so digits align like a
+   real scoreboard instead of shifting width as they change. */
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hairline card, the base surface unit across the app -- deliberately flat,
+   no gradients, no glow. The pitch does the talking. */
+.surface {
+  @apply bg-pitch-900 border border-pitch-800 rounded-xl;
+}
+
+/* The center-circle motif: a thin ring with a filled spot, used as the
+   logomark and reused as a structural divider element elsewhere. */
+.center-spot {
+  position: relative;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: 1.5px solid currentColor;
+}
+.center-spot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+/* Visible keyboard focus -- accessibility floor, not optional */
+:focus-visible {
+  outline: 2px solid theme("colors.turf.DEFAULT");
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
